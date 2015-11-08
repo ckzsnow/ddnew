@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="css/mui.min.css">
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.home-title {
+				text-align: center;
+			}
+			.home-title > a {
+				padding: 10px 20px;
+				display: inline-block;
+				color:black;
+			}
+			.home-title > a.active {
+				border-bottom: 2px solid #007aff;
+				color:#0c63ee;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;background-color: #0c63ee;">
+			<h1 class="mui-title" style="color:white;">点豆成兵</h1>
+		</header>
+		<div class="mui-content">
+			<div id="segmentedControl" class="home-title mui-bar mui-bar-nav" style="font-size:15px;background-color: white;margin-top: 44px;">
+				<a id="course-chosen.html" class="active" href="course-chosen.html">精选</a>
+				<a id="course-latest.html" href="course-latest.html">最新</a>
+				<a id="course-recommend.html" href="course-recommend.html">推荐</a>
+			</div>
+			<div id="slider" class="mui-slider" style="margin-top:45px;">
+				<div class="mui-slider-group mui-slider-loop"  style="height:150px;">
+					<!-- 额外增加的一个节点(循环轮播：第一个节点是最后一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<a href="#">
+							<img src="images/home.png">
+						</a>
+					</div>
+					<!-- 第一张 -->
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="images/home.png">
+						</a>
+					</div>
+					<!-- 第二张 -->
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="images/home.png">
+						</a>
+					</div>
+					<!-- 第三张 -->
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="images/home.png">
+						</a>
+					</div>
+					<!-- 第四张 -->
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="images/home.png">
+						</a>
+					</div>
+					<!-- 额外增加的一个节点(循环轮播：最后一个节点是第一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<a href="#">
+							<img src="images/home.png">
+						</a>
+					</div>
+				</div>
+				<div class="mui-slider-indicator">
+					<div class="mui-indicator mui-active"></div>
+					<div class="mui-indicator"></div>
+					<div class="mui-indicator"></div>
+					<div class="mui-indicator"></div>
+				</div>
+			</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script>
+			(function($, doc) {
+				$.init();
+				var subpages = ['course-chosen.html', 'course-latest.html', 'course-recommend.html'];
+				var subpage_style = {
+					top: '235px',
+					bottom: '0px'
+				};
+				
+				var aniShow = {};
+				
+				 //创建子页面，首个选项卡页面显示，其它均隐藏；
+				$.plusReady(function() {
+					var self = plus.webview.currentWebview();
+					for (var i = 0; i < 3; i++) {
+						var temp = {};
+						var sub = plus.webview.create(subpages[i], subpages[i], subpage_style);
+						if (i > 0) {
+							sub.hide();
+						}else{
+							temp[subpages[i]] = "true";
+							$.extend(aniShow,temp);
+						}
+						self.append(sub);
+					}
+					plus.navigator.closeSplashscreen();
+				});
+				mui("#slider").slider({
+					interval: 3000
+				});
+				 //当前激活选项
+				var activeTab = subpages[0];
+				 //选项卡点击事件
+				$('#segmentedControl').on('tap', 'a', function(e) {
+					var targetTab = this.getAttribute('href');
+					if (targetTab == activeTab) {
+						return;
+					}
+					for(var index in subpages) {
+						if(subpages[index] == targetTab) {
+							doc.getElementById(subpages[index]).setAttribute('class', 'active');
+						} else {
+							doc.getElementById(subpages[index]).setAttribute('class', '');
+						}
+					}
+					//显示目标选项卡
+					if($.os.ios||aniShow[targetTab]){
+						plus.webview.show(targetTab, "slide-in-right", 300);
+					}else{
+						var temp = {};
+						temp[targetTab] = "true";
+						$.extend(aniShow,temp);
+						plus.webview.show(targetTab,"slide-in-right",300);
+					}
+					//隐藏当前;
+					plus.webview.hide(activeTab);
+					//更改当前活跃的选项卡
+					activeTab = targetTab;
+				});
+				$.oldBack = mui.back;
+				var backButtonPress = 0;
+				$.back = function(event) {
+					backButtonPress++;
+					if (backButtonPress > 1) {
+						plus.runtime.quit();
+					} else {
+						plus.nativeUI.toast('再按一次退出应用');
+					}
+					setTimeout(function() {
+						backButtonPress = 0;
+					}, 1000);
+					return false;
+				};
+			}(mui, document));
+		</script>
+	</body>
+
+</html>
