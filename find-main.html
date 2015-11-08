@@ -8,7 +8,7 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 		<link rel="stylesheet" href="css/mui.min.css">
-		<link rel="stylesheet" href="css/iconfont.css"/>
+		<link rel="stylesheet" href="css/iconfont.css" />
 		<style>
 			html,
 			body {
@@ -26,6 +26,34 @@
 				border-bottom: 2px solid #007aff;
 				color: #0c63ee;
 			}
+			#industryList .industry {
+				margin-top: 10px;
+				margin-left: 10px;
+				display: inline-block;
+				width:65px;
+				height:65px;
+				position:relative;
+			}
+			#industryList .industry .imgItem {
+				width:65px;
+				height:65px;
+			}
+			#industryList .industry .select {
+				width: 65px;
+				height: 65px;
+				line-height: 65px;
+				overflow: hidden;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				background-color: rgba(43, 125, 225, 0.7);
+				text-align: center;
+			}
+			#industryList .industry .select .check{
+				font-size: 35px;
+				color:white;
+				line-height: 65px;
+			}
 		</style>
 	</head>
 
@@ -39,52 +67,8 @@
 				<a id="field_tab" href="#">行业细分</a>
 			</div>
 			<div id="industry_detail">
-				<div id="industryList" class="mui-table-view mui-grid-view" style="margin-top:55px;">
-					<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-						<img src="images/industry/caiwu.png" style="width:100%;height:100%;"/>
-						<span class="mui-icon iconfont icon-check" style='position: absolute;width:100%;height:100%;top: 10px;left: 14px;font-size: 40px;color:white;background-color:rgba(43, 125, 225, 0.6);'></span>
-						<!--<div style="position: absolute;top: 10px;left: 14px;background-color:rgba(43, 125, 225, 0.8);">
-							<div><span class="mui-icon iconfont icon-check" style='font-size: 40px;color:white;'></span></div>
-						</div>-->
-					</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-						<img src="images/industry/dichan.png" style="width:100%;height:100%;"/>
-				</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<img src="images/industry/falv.png" style="width:100%;height:100%;"/>
-					</a>
-				</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<img src="images/industry/hulianwang.png" style="width:100%;height:100%;"/>
-					</a>
-				</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<img src="images/industry/it.png" style="width:100%;height:100%;"/>
-					</a>
-				</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<img src="images/industry/jiaoyu.png" style="width:100%;height:100%;"/>
-					</a>
-				</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<img src="images/industry/jinrong.png" style="width:100%;height:100%;"/>
-					</a>
-				</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<img src="images/industry/yiliaojiankang.png" style="width:100%;height:100%;"/>
-					</a>
-				</div>
-				<div class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<img src="images/industry/zixun.png" style="width:100%;height:100%;"/>
-					</a>
-				</div>
+				<div id="industryList" style="margin-top:55px;background-color: white;">
+					
 				</div>
 				<div id="findNext" class="mui-table-view" style="margin-top:10px;margin-bottom:10px;">
 					<div class="mui-table-view-cell" style="text-align: center;">
@@ -93,7 +77,7 @@
 				</div>
 			</div>
 			<div id="field_detail">
-				
+
 			</div>
 		</div>
 	</body>
@@ -102,33 +86,31 @@
 	<script type="text/javascript" charset="utf-8">
 		(function($, doc) {
 			$.init();
-			/*var industryData = app.data.industry;
+			var industryData = app.data.industry;
 			var industryList = doc.getElementById('industryList');
 			var industryListHtml = '';
 			for(index in industryData) {
-				industryListHtml = industryListHtml + "<div class='mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3' id='industry_"+industryData[index].id+"'><img src='"+industryData[index].icon+"' style='width:100%;height:100%;'/></div>";
+				industryListHtml = industryListHtml + "<div class='industry' id='industry_"+industryData[index].id+"'><img src='"+industryData[index].icon+"' class='imgItem'/></div>";
 			}
 			$('#industryList').on('tap', 'div', function(e) {
-				alert(this.getAttribute('id'));
-				var oDiv = doc.createElement("div");
-				/*oDiv.style.width="100px";
-				oDiv.style.height="100px";
-				oDiv.style.backgroundColor="#0c63ee";
-				oDiv.style.position = "absolute";
-				oDiv.style.top = "0px";
-				oDiv.style.left = "0px";
-				var oSpan = doc.createElement('span');
-				oSpan.style.color = 'white';
-				oSpan.setAttribute('class', 'mui-icon iconfont icon-check');
-				oDiv.appendChild(oSpan);
-				this.appendChild(oDiv);
+				if(this.childElementCount != 1) {
+					this.removeChild(this.lastChild);
+				} else {
+					var oDiv = doc.createElement("div");
+					oDiv.setAttribute('class', 'select');
+					var oSpan = doc.createElement('span');
+					oSpan.style.color = 'white';
+					oSpan.setAttribute('class', 'mui-icon iconfont icon-check check');
+					oDiv.appendChild(oSpan);
+					this.appendChild(oDiv);
+				}
 			});
 			industryList.innerHTML = industryListHtml;
 			$('#findNext').on('tap', 'div', function(e) {
 				doc.getElementById("industry_tab").setAttribute('class', '');
 				doc.getElementById("field_tab").setAttribute('class', 'active');
 				doc.getElementById("industry_detail").style.display = "none";
-			});*/
+			});
 			$.oldBack = mui.back;
 			var backButtonPress = 0;
 			$.back = function(event) {
