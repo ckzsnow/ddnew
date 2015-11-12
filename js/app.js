@@ -1,4 +1,7 @@
 (function($, owner) {
+	owner.testClick = function() {
+		alert(11111);
+	}
 	/**
 	 * 用户登录
 	 **/
