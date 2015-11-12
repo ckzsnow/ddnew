@@ -54,11 +54,43 @@
 				color:white;
 				line-height: 65px;
 			}
+			
+			#fieldList .field {
+				margin-top: 10px;
+				margin-left: 10px;
+				display: inline-block;
+				width:65px;
+				height:65px;
+				position:relative;
+			}
+			#fieldList .field .imgItem {
+				width:65px;
+				height:65px;
+			}
+			#fieldList .field .select {
+				width: 65px;
+				height: 65px;
+				line-height: 65px;
+				overflow: hidden;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				background-color: rgba(43, 125, 225, 0.7);
+				text-align: center;
+			}
+			#fieldList .field .select .check{
+				font-size: 35px;
+				color:white;
+				line-height: 65px;
+			}
 		</style>
 	</head>
 
 	<body>
 		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;background-color: #0c63ee;">
+			<button type="button" id="prePage" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left" style="display: none;">
+				<span class="mui-icon mui-icon-left-nav" style="color:white;"></span>
+			</button>
 			<h1 class="mui-title" style="color:white;">发现</h1>
 		</header>
 		<div class="mui-content">
@@ -67,17 +99,24 @@
 				<a id="field_tab" href="#">行业细分</a>
 			</div>
 			<div id="industry_detail">
-				<div id="industryList" style="margin-top:55px;background-color: white;">
-					
+				<div id="industryList" style="margin-top:55px;background-color: white;padding-left:10px;">
+						
 				</div>
-				<div id="findNext" class="mui-table-view" style="margin-top:10px;margin-bottom:10px;">
+				<div id="industryFindNext" class="mui-table-view" style="margin-top:10px;margin-bottom:10px;">
 					<div class="mui-table-view-cell" style="text-align: center;">
 						<span style="color:#007aff">下一步</span>
 					</div>
 				</div>
 			</div>
-			<div id="field_detail">
-
+			<div id="field_detail" style="display:none;">
+				<div id="fieldList" style="margin-top:55px;">
+					
+				</div>
+				<div id="fieldFindNext" class="mui-table-view" style="margin-top:10px;margin-bottom:10px;">
+					<div class="mui-table-view-cell" style="text-align: center;">
+						<span style="color:#007aff">下一步</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	</body>
@@ -89,12 +128,29 @@
 			var industryData = app.data.industry;
 			var industryList = doc.getElementById('industryList');
 			var industryListHtml = '';
-			for(index in industryData) {
+			var selectedCategoryInfo =  {"1":{}};
+			for(var index in industryData) {
 				industryListHtml = industryListHtml + "<div class='industry' id='industry_"+industryData[index].id+"'><img src='"+industryData[index].icon+"' class='imgItem'/></div>";
 			}
+			industryList.innerHTML = industryListHtml;
+			if(selectedCategoryInfo != null && selectedCategoryInfo != undefined &&
+				selectedCategoryInfo != '{}') {
+				for(var index in selectedCategoryInfo) {
+					var ele = doc.getElementById('industry_' + index);
+					var oDiv = doc.createElement("div");
+					oDiv.setAttribute('class', 'select');
+					var oSpan = doc.createElement('span');
+					oSpan.style.color = 'white';
+					oSpan.setAttribute('class', 'mui-icon iconfont icon-check check');
+					oDiv.appendChild(oSpan);
+					ele.appendChild(oDiv);
+				}
+			}
 			$('#industryList').on('tap', 'div', function(e) {
+				var industryId = this.id.substr(9);
 				if(this.childElementCount != 1) {
 					this.removeChild(this.lastChild);
+					delete selectedCategoryInfo[industryId];
 				} else {
 					var oDiv = doc.createElement("div");
 					oDiv.setAttribute('class', 'select');
@@ -103,28 +159,46 @@
 					oSpan.setAttribute('class', 'mui-icon iconfont icon-check check');
 					oDiv.appendChild(oSpan);
 					this.appendChild(oDiv);
+					selectedCategoryInfo[industryId] = {};
 				}
+				localStorage.setItem('$selectedCategoryInfo', selectedCategoryInfo);
 			});
-			industryList.innerHTML = industryListHtml;
-			$('#findNext').on('tap', 'div', function(e) {
-				doc.getElementById("industry_tab").setAttribute('class', '');
-				doc.getElementById("field_tab").setAttribute('class', 'active');
-				doc.getElementById("industry_detail").style.display = "none";
-			});
-			$.oldBack = mui.back;
-			var backButtonPress = 0;
-			$.back = function(event) {
-				backButtonPress++;
-				if (backButtonPress > 1) {
-					plus.runtime.quit();
+			$('#industryFindNext').on('tap', 'div', function(e) {
+				if(selectedCategoryInfo == null || selectedCategoryInfo == undefined 
+					|| selectedCategoryInfo == '{}') {
+					//TODO
 				} else {
-					plus.nativeUI.toast('再按一次退出应用');
+					createFieldList();
+					doc.getElementById("industry_tab").setAttribute('class', '');
+					doc.getElementById("field_tab").setAttribute('class', 'active');
+					doc.getElementById("industry_detail").style.display = "none";
+					doc.getElementById("field_detail").style.display = "";
+					doc.getElementById("prePage").style.display = "";
 				}
-				setTimeout(function() {
-					backButtonPress = 0;
-				}, 1000);
-				return false;
-			};
+			});
+			function createFieldList() {
+				var fieldList = doc.getElementById('fieldList');
+				var fieldListHtml = '';
+				for(var id in selectedCategoryInfo) {
+					var fieldData = app.data.field[id];
+					var fieldSubListHtml = '<div class="fieldSubList" style="padding-bottom:10px;background-color: white;padding-left:10px;"><p style="padding-top:10px;margin-left:10px;">'+industryData[id-1].name+'</p><hr/>';
+					for(var index in fieldData) {
+						fieldSubListHtml = fieldSubListHtml + "<div class='field' id='field_"+fieldData[index].id+"'><img src='"+fieldData[index].icon+"' class='imgItem'/></div>";
+					}
+					fieldListHtml = fieldListHtml + "<div style='width:100%;height:10px;'></div>" + fieldSubListHtml + "</div>";
+				}
+				fieldList.innerHTML = fieldListHtml;
+				$('.fieldSubList').on('tap', 'div', function(e) {
+					alert(222);
+				});
+				$('#prePage').on('tap', 'span', function(e) {
+					doc.getElementById("industry_tab").setAttribute('class', 'active');
+					doc.getElementById("field_tab").setAttribute('class', '');
+					doc.getElementById("industry_detail").style.display = "";
+					doc.getElementById("field_detail").style.display = "none";
+					doc.getElementById("prePage").style.display = "none";
+				}); 
+			}
 		}(mui, document));
 	</script>
 
