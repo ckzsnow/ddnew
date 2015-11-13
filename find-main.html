@@ -67,7 +67,7 @@
 				width:65px;
 				height:65px;
 			}
-			#fieldList .field .select {
+			.fieldSelect {
 				width: 65px;
 				height: 65px;
 				line-height: 65px;
@@ -77,11 +77,6 @@
 				left: 0px;
 				background-color: rgba(43, 125, 225, 0.7);
 				text-align: center;
-			}
-			#fieldList .field .select .check{
-				font-size: 35px;
-				color:white;
-				line-height: 65px;
 			}
 			#topPopover {
 				position: fixed;
@@ -107,7 +102,6 @@
 			</div>
 			<div id="industry_detail">
 				<div id="industryList" style="margin-top:55px;background-color: white;padding-left:10px;">
-						
 				</div>
 				<div id="industryFindNext" class="mui-table-view" style="margin-top:10px;margin-bottom:10px;">
 					<div class="mui-table-view-cell" style="text-align: center;">
@@ -130,21 +124,42 @@
 	<script src="js/mui.min.js"></script>
 	<script src="js/app.js"></script>
 	<script type="text/javascript" charset="utf-8">
-		function clickTest() {
-			
+		var currentWebView;
+		var stageView;
+		var stageViewTop;
+		var currentSelectedFieldId;
+		var currentSelectedFieldName;
+		function closeMask() {
+			currentWebView.setStyle({
+				mask: "none"
+			});
+			if (!stageView) {
+				stageView = plus.webview.getWebviewById("share.html");
+			}
+			if (stageView) {
+				stageView.hide();
+			}
 		}
 		(function($, doc) {
 			$.init();
+			$.plusReady(function() {
+				currentWebView = plus.webview.currentWebview();
+				currentWebView.addEventListener("maskClick", closeMask, false);
+				stageViewTop = plus.display.resolutionHeight - 301;
+				stageView = plus.webview.create("stage.html", "stage.html", {top:stageViewTop,bottom:'0px'});
+			});
+			localStorage.clear();
 			var industryData = app.data.industry;
 			var industryList = doc.getElementById('industryList');
 			var industryListHtml = '';
-			var selectedCategoryInfo =  {"1":{}};
+			var selectedCategoryInfo = JSON.parse(localStorage.getItem('$selectedCategoryInfo') || "{}");
+			var selectedCategoryInfoStr = JSON.stringify(selectedCategoryInfo);
 			for(var index in industryData) {
 				industryListHtml = industryListHtml + "<div class='industry' id='industry_"+industryData[index].id+"'><img src='"+industryData[index].icon+"' class='imgItem'/></div>";
 			}
 			industryList.innerHTML = industryListHtml;
-			if(selectedCategoryInfo != null && selectedCategoryInfo != undefined &&
-				selectedCategoryInfo != '{}') {
+			if(selectedCategoryInfoStr != null && selectedCategoryInfoStr != undefined &&
+				selectedCategoryInfoStr != '{}') {
 				for(var index in selectedCategoryInfo) {
 					var ele = doc.getElementById('industry_' + index);
 					var oDiv = doc.createElement("div");
@@ -164,6 +179,7 @@
 				} else {
 					var oDiv = doc.createElement("div");
 					oDiv.setAttribute('class', 'select');
+					oDiv.setAttribute('id', 'industry_' + industryId);
 					var oSpan = doc.createElement('span');
 					oSpan.style.color = 'white';
 					oSpan.setAttribute('class', 'mui-icon iconfont icon-check check');
@@ -171,12 +187,13 @@
 					this.appendChild(oDiv);
 					selectedCategoryInfo[industryId] = {};
 				}
-				localStorage.setItem('$selectedCategoryInfo', selectedCategoryInfo);
+				localStorage.setItem('$selectedCategoryInfo', JSON.stringify(selectedCategoryInfo));
+				selectedCategoryInfoStr = JSON.stringify(selectedCategoryInfo);
 			});
 			$('#industryFindNext').on('tap', 'div', function(e) {
-				if(selectedCategoryInfo == null || selectedCategoryInfo == undefined 
-					|| selectedCategoryInfo == '{}') {
-					//TODO
+				if(selectedCategoryInfoStr == null || selectedCategoryInfoStr == undefined 
+					|| selectedCategoryInfoStr == '{}') {
+					$.alert('您还没有选择行业大类！', '点豆成兵', null);
 				} else {
 					createFieldList();
 					doc.getElementById("industry_tab").setAttribute('class', '');
@@ -186,6 +203,9 @@
 					doc.getElementById("prePage").style.display = "";
 				}
 			});
+			$('#fieldFindNext').on('tap', 'div', function(e) {
+				alert(11111111);
+			});
 			function createFieldList() {
 				var fieldList = doc.getElementById('fieldList');
 				var fieldListHtml = '';
@@ -193,13 +213,34 @@
 					var fieldData = app.data.field[id];
 					var fieldSubListHtml = '<div class="fieldSubList" style="padding-bottom:10px;background-color: white;padding-left:10px;"><p style="padding-top:10px;margin-left:10px;">'+industryData[id-1].name+'</p><hr/>';
 					for(var index in fieldData) {
-						fieldSubListHtml = fieldSubListHtml + "<div class='field' id='field_"+fieldData[index].id+"'><a href='#' onclick='clickTest();'><img src='"+fieldData[index].icon+"' class='imgItem'/></a></div>";
+						fieldSubListHtml = fieldSubListHtml + "<div class='field' id='field_"+fieldData[index].id+"' industryId='"+id+"'><img src='"+fieldData[index].icon+"' class='imgItem'/></div>";
 					}
 					fieldListHtml = fieldListHtml + "<div style='width:100%;height:10px;'></div>" + fieldSubListHtml + "</div>";
 				}
 				fieldList.innerHTML = fieldListHtml;
 				$('.fieldSubList').on('tap', 'div', function(e) {
-					//alert(222);
+					currentSelectedFieldId = this.id.substr(6);
+					currentSelectedFieldName = app.data.industry[this.getAttribute("industryId") - 1].name;
+					
+					var selectedStage = ["1", "2"];
+					var fieldNode = document.getElementById('field_' + currentSelectedFieldId);
+					var divNode = document.createElement('div');
+					divNode.setAttribute('class', 'fieldSelect');
+					var pNode = document.createElement('p');
+					pNode.innerHTML=currentSelectedFieldName;
+					divNode.appendChild(pNode);
+					for(var index in selectedStage) {
+						var liNode = document.createElement('li');
+						liNode.innerHTML = app.data.stage[selectedStage[index] - 1].name;
+						divNode.appendChild(liNode);
+					}
+					fieldNode.appendChild(divNode);
+					
+					
+					/*currentWebView.setStyle({
+						mask: "rgba(0,0,0,0.5)"
+					});
+					plus.webview.show('stage.html', 'slide-in-bottom', 300);*/
 				});
 				$('#prePage').on('tap', 'span', function(e) {
 					doc.getElementById("industry_tab").setAttribute('class', 'active');
@@ -209,7 +250,25 @@
 					doc.getElementById("prePage").style.display = "none";
 				}); 
 			}
+			window.addEventListener('getSelectedStage', function(e) {
+				var selectedStage = e.detail.stage;
+				if(selectedStage.length == 0) {
+					//alert(0);
+				} else {
+					var fieldNode = document.getElementById('field_' + currentSelectedFieldId);
+					var divNode = document.createElement('div');
+					divNode.setAttribute('class', 'field select');
+					var pNode = document.createElement('p');
+					pNode.innerHTML=currentSelectedFieldName;
+					divNode.appendChild(pNode);
+					for(var index in selectedStage) {
+						var liNode = document.createElement('li');
+						liNode.innerHTML = app.data.stage[selectedStage[index] - 1].name;
+						divNode.appendChild(liNode);
+					}
+					fieldNode.appendChild(divNode);
+				}			
+			});
 		}(mui, document));
 	</script>
-
 </html>

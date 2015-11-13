@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/mui.min.css">
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<h5 class="mui-content-padded" style="text-align: center;color: black;font-size: 18px;">课程方向</h5>
+			<div class="mui-card">
+				<form class="mui-input-group">
+					<div class="mui-input-row mui-checkbox">
+						<label>求职面试</label>
+						<input id="qiuzhi" value="1" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox">
+						<label>从业技能</label>
+						<input id="congye" value="2" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox">
+						<label>行业经验</label>
+						<input id="hangye" value="3" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox">
+						<label>创业</label>
+						<input id="chuangye" value="4" type="checkbox">
+					</div>
+				</form>
+			</div>
+			<h5 class="mui-content-padded" style="margin-top:10px;margin-left: 15px;">提示：此处为多选项，最多可选三个。</h5>
+			<div style="margin-left:15px;margin-right: 15px;" id="buttonSubmit">
+				<button class="mui-btn mui-btn-block mui-btn-primary">确认</button>
+			</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" charset="utf-8">
+		(function($, doc) {
+			$.init();
+			var currentSelectedCount = 0;
+			$('.mui-input-group').on('change', 'input', function(e) {
+				var value = this.checked?"true":"false";
+				if(value == 'true') {
+					if(currentSelectedCount == 3) {
+						this.checked = false;
+						mui.alert('此处最多只能选择三个！', '点豆成兵', null);
+					} else {
+						currentSelectedCount++;
+					}
+				} else {
+					currentSelectedCount--;
+				}
+			});
+			$('#buttonSubmit').on('tap', 'button', function(e) {
+				var selectedStage = [];
+				if(document.getElementById('qiuzhi').checked) {
+					document.getElementById('qiuzhi').checked == false;
+					selectedStage.push("1");
+				}
+				if(document.getElementById('congye').checked) {
+					document.getElementById('congye').checked = false;
+					selectedStage.push("2");
+				}
+				if(document.getElementById('hangye').checked) {
+					document.getElementById('hangye').checked = false;
+					selectedStage.push("3");
+				}
+				if(document.getElementById('chuangye').checked) {
+					document.getElementById('chuangye').checked = false;
+					selectedStage.push("4");
+				}
+				var find_main = plus.webview.getWebviewById('find-main.html');
+				$.fire(find_main,'getSelectedStage',{
+					stage:selectedStage
+				});
+				currentSelectedCount = 0;
+				$.back();
+			});
+			$.back = function() {
+				currentSelectedCount = 0;
+				var sourcePage = plus.webview.getWebviewById('find-main.html');
+				if (sourcePage) {
+					sourcePage.evalJS("closeMask()");
+				}
+			}
+		}(mui, document));
+		</script>
+	</body>
+
+</html>
